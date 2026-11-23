@@ -43,6 +43,7 @@ const createRoom = async (req, res, next) => {
       ac,
       attached_bathroom,
       description,
+      amenities = [],
     } = req.body;
 
     if (!property_id || !room_number || !sharing_type || !price || total_beds === undefined) {
@@ -94,6 +95,7 @@ const createRoom = async (req, res, next) => {
       ac: Boolean(ac),
       attached_bathroom: attached_bathroom !== undefined ? Boolean(attached_bathroom) : true,
       description: description ? description.trim() : null,
+      amenities: Array.isArray(amenities) ? amenities.filter((item) => typeof item === 'string').map((item) => item.trim()).filter(Boolean).slice(0, 30) : [],
     });
 
     const roomData = room.toJSON();
@@ -123,6 +125,7 @@ const updateRoom = async (req, res, next) => {
       ac,
       attached_bathroom,
       description,
+      amenities,
     } = req.body;
 
     const { Room, Property } = getModels();
@@ -161,6 +164,7 @@ const updateRoom = async (req, res, next) => {
     if (ac !== undefined) room.ac = Boolean(ac);
     if (attached_bathroom !== undefined) room.attached_bathroom = Boolean(attached_bathroom);
     if (description !== undefined) room.description = description ? description.trim() : null;
+    if (amenities !== undefined) room.amenities = Array.isArray(amenities) ? amenities.filter((item) => typeof item === 'string').map((item) => item.trim()).filter(Boolean).slice(0, 30) : [];
 
     await room.save();
 
