@@ -29,7 +29,7 @@ const userLocationIcon = new L.Icon({
 const ChangeView = ({ center, zoom }) => {
   const map = useMap();
   useEffect(() => {
-    if (center && center[0] && center[1]) {
+    if (center && Number.isFinite(Number(center[0])) && Number.isFinite(Number(center[1]))) {
       map.setView(center, zoom);
     }
   }, [center, zoom, map]);
@@ -38,16 +38,16 @@ const ChangeView = ({ center, zoom }) => {
 
 const MapView = ({
   properties = [],
-  center = [12.9716, 77.5946], // Default Bangalore
+  center = [17.385, 78.4867], // Hyderabad fallback
   zoom = 12,
   userCoords = null,
   radiusKm = null,
 }) => {
   // If we have properties, compute center or use userCoords
   let mapCenter = center;
-  if (userCoords && userCoords.latitude && userCoords.longitude) {
+  if (userCoords && Number.isFinite(Number(userCoords.latitude)) && Number.isFinite(Number(userCoords.longitude))) {
     mapCenter = [userCoords.latitude, userCoords.longitude];
-  } else if (properties.length > 0 && properties[0].latitude && properties[0].longitude) {
+  } else if (properties.length > 0 && properties[0].latitude != null && properties[0].longitude != null) {
     mapCenter = [parseFloat(properties[0].latitude), parseFloat(properties[0].longitude)];
   }
 
@@ -66,7 +66,7 @@ const MapView = ({
         />
 
         {/* User location marker if available */}
-        {userCoords && userCoords.latitude && userCoords.longitude && (
+        {userCoords && Number.isFinite(Number(userCoords.latitude)) && Number.isFinite(Number(userCoords.longitude)) && (
           <>
             <Marker position={[userCoords.latitude, userCoords.longitude]} icon={userLocationIcon}>
               <Popup>
