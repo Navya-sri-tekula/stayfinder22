@@ -43,6 +43,8 @@ const FiltersBar = ({
   onGetLocation,
   onClearLocation,
   onSearchLocation,
+  geolocationError,
+  geolocationLoading,
 }) => {
   const [locationQuery, setLocationQuery] = useState('');
   const [locationError, setLocationError] = useState('');
@@ -294,10 +296,12 @@ const FiltersBar = ({
             </button>
           ) : (
             <button
+              type="button"
               onClick={onGetLocation}
+              disabled={geolocationLoading}
               style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '3px' }}
             >
-              <Navigation size={12} /> Use GPS
+              <Navigation size={12} /> {geolocationLoading ? 'Finding location…' : 'Use GPS'}
             </button>
           )}
         </div>
@@ -312,6 +316,8 @@ const FiltersBar = ({
             <option key={r.value} value={r.value}>{r.label}</option>
           ))}
         </select>
+        {geolocationError && <p role="alert" style={{ fontSize: '0.75rem', color: 'var(--danger)', marginTop: '6px' }}>{geolocationError}</p>}
+        {userCoords && <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 5 }}>GPS accuracy: {userCoords.accuracy ? Math.round(userCoords.accuracy) + ' m' : 'not reported'}</p>}
         {filters.radius && !userCoords && (
           <p style={{ fontSize: '0.75rem', color: '#b45309', marginTop: '4px' }}>
             * Click "Use GPS" above to enable radius distance filtering from your position.
