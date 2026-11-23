@@ -7,20 +7,26 @@ export const formatCurrency = (amount) => {
   }).format(amount);
 };
 
-export const getPriceSuffix = (type) => type === 'hotel' ? '/night' : '/month';
-
-const apiBase = import.meta.env.VITE_API_BASE_URL || '/api';
-const apiOrigin = apiBase.startsWith('http') ? new URL(apiBase).origin : '';
+export const getPriceSuffix = (type) => {
+  if (type === 'hotel') return '/night';
+  return '/month';
+};
 
 export const getImageUrl = (url) => {
-  if (!url) return 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=800&q=80';
-  if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  if (url.startsWith('/')) return `${apiOrigin}${url}`;
+  if (!url) {
+    return 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=800&q=80';
+  }
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  // If local upload relative path
   return url;
 };
 
 export const formatDistance = (distance) => {
   if (distance === null || distance === undefined) return null;
-  if (distance < 1) return `${Math.round(distance * 1000)} m away`;
+  if (distance < 1) {
+    return `${Math.round(distance * 1000)} m away`;
+  }
   return `${distance.toFixed(1)} km away`;
 };
