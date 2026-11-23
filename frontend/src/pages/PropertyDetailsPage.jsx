@@ -334,6 +334,8 @@ const PropertyDetailsPage = () => {
                           )}
                         </div>
 
+                        {room.amenities?.length > 0 && <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', margin: '0.5rem 0' }}>{room.amenities.map((amenity) => <span key={amenity} className="facility-pill-sm">{amenity}</span>)}</div>}
+
                         {room.description && (
                           <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)' }}>{room.description}</p>
                         )}
