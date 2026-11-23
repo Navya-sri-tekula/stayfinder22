@@ -1,6 +1,6 @@
 const { getModels } = require('../models');
 const PropertyService = require('../services/propertyService');
-const { uploadImageBuffer } = require('../config/cloudinary');
+const { uploadImageBuffer } = require('../config/storage');
 
 // @desc    Get all properties with filtering, search, map radius & pagination
 // @route   GET /api/properties
