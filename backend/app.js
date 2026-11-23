@@ -28,11 +28,22 @@ const searchOpenStreetMapLocation = async (query) => {
     const wait = Math.max(0, 1100 - (Date.now() - lastGeocodeAt));
     if (wait) await new Promise((resolve) => setTimeout(resolve, wait));
     lastGeocodeAt = Date.now();
-    const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(query.trim())}`;
+    const normalizedQuery = query.trim();
+    const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&dedupe=1&countrycodes=in&limit=5&q=${encodeURIComponent(normalizedQuery)}`;
     const response = await fetch(url, { headers: { Accept: 'application/json', 'User-Agent': 'StayFinder/1.0 (location search)' } });
     if (!response.ok) throw new Error('OpenStreetMap location search is temporarily unavailable.');
     const results = await response.json();
-    const result = results[0] ? { latitude: Number(results[0].lat), longitude: Number(results[0].lon), display_name: results[0].display_name } : null;
+    const normalized = key.replace(/[^a-z0-9 ]/g, ' ').split(/\\s+/).filter(Boolean);
+    const ranked = results.map((item) => {
+      const address = item.address || {};
+      const searchable = [item.display_name, address.suburb, address.neighbourhood, address.city_district, address.city, address.town, address.village, address.county, address.state].filter(Boolean).join(' ').toLowerCase();
+      const matched = normalized.filter((token) => searchable.includes(token)).length;
+      const india = String(address.country_code || '').toLowerCase() === 'in' ? 2 : 0;
+      const locality = /suburb|neighbourhood|residential|quarter|village|town|city/i.test(String(item.type || '') + ' ' + String(item.class || '')) ? 1 : 0;
+      return { item, score: matched * 10 + india + locality };
+    }).sort((a, b) => b.score - a.score);
+    const best = ranked[0]?.item;
+    const result = best ? { latitude: Number(best.lat), longitude: Number(best.lon), display_name: best.display_name, address: best.address || {} } : null;
     geocodeCache.set(key, { result, expiresAt: Date.now() + 24 * 60 * 60 * 1000 });
     return result;
   });
