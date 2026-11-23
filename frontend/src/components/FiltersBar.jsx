@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Filter, X, RotateCcw, MapPin, Navigation } from 'lucide-react';
 
 const PROPERTY_TYPES = [
@@ -41,7 +41,25 @@ const FiltersBar = ({
   userCoords,
   onGetLocation,
   onClearLocation,
+  onSearchLocation,
 }) => {
+  const [locationQuery, setLocationQuery] = useState('');
+  const [locationError, setLocationError] = useState('');
+  const [locationLoading, setLocationLoading] = useState(false);
+  const searchLocation = async () => {
+    if (!locationQuery.trim()) return;
+    setLocationLoading(true);
+    setLocationError('');
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(locationQuery.trim())}`;
+      const response = await fetch(url, { headers: { Accept: 'application/json' } });
+      if (!response.ok) throw new Error('Location search is temporarily unavailable.');
+      const results = await response.json();
+      if (!results.length) throw new Error('No matching location found. Try a nearby area or landmark.');
+      onSearchLocation(Number(results[0].lat), Number(results[0].lon), results[0].display_name);
+    } catch (error) { setLocationError(error.message || 'Could not find that location.'); }
+    finally { setLocationLoading(false); }
+  };
   const handleTypeSelect = (typeVal) => {
     onFilterChange('type', typeVal);
   };
@@ -252,6 +270,17 @@ const FiltersBar = ({
             );
           })}
         </div>
+      </div>
+
+      {/* Free OpenStreetMap location search */}
+      <div>
+        <label className="form-label" style={{ fontSize: '0.85rem' }}>Find stays around a place</label>
+        <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.35rem' }}>
+          <input value={locationQuery} onChange={(e) => setLocationQuery(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); searchLocation(); } }} placeholder="Area, college, landmark..." className="form-input" style={{ minWidth: 0, padding: '0.45rem 0.65rem', fontSize: '0.85rem' }} />
+          <button type="button" onClick={searchLocation} disabled={locationLoading} className="btn btn-primary btn-sm">{locationLoading ? 'Finding...' : 'Find'}</button>
+        </div>
+        {locationError && <p role="alert" style={{ color: 'var(--danger)', fontSize: '0.75rem', marginTop: '4px' }}>{locationError}</p>}
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.72rem', marginTop: '4px' }}>Location search by OpenStreetMap / Nominatim</p>
       </div>
 
       {/* Location Radius */}
