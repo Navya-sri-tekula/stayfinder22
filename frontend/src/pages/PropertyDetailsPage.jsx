@@ -175,6 +175,11 @@ const PropertyDetailsPage = () => {
           <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
             per bed {getPriceSuffix(property.type)}
           </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '0.75rem' }}>
+            {property.owner?.phone && <a className="btn btn-outline btn-sm" href={`tel:${property.owner.phone}`}><Phone size={14} style={{ marginRight: 5 }} /> Call owner</a>}
+            {property.owner?.phone && <a className="btn btn-outline btn-sm" href={`https://wa.me/${String(property.owner.phone).replace(/\\D/g, '')}?text=${encodeURIComponent(`Hello, I found ${property.name} on StayFinder and would like to know about room availability.`)}`} target="_blank" rel="noreferrer">WhatsApp</a>}
+            {property.owner?.email && <a className="btn btn-outline btn-sm" href={`mailto:${property.owner.email}?subject=${encodeURIComponent(`Stay enquiry - ${property.name}`)}`}><Mail size={14} style={{ marginRight: 5 }} /> Email</a>}
+          </div>
         </div>
       </div>
 
