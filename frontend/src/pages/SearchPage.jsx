@@ -230,8 +230,7 @@ const SearchPage = () => {
             onClearLocation={clearLocation}
             onSearchLocation={(latitude, longitude, displayName) => {
               setCoords({ latitude, longitude });
-              const area = displayName.split(',').slice(0, 2).join(',').trim();
-              const updated = { ...filters, city: area, sortBy: 'distance', radius: filters.radius || '5', page: 1 };
+              const updated = { ...filters, sortBy: 'distance', radius: filters.radius || '5', page: 1 };
               setFilters(updated);
               const params = new URLSearchParams();
               Object.entries(updated).forEach(([key, value]) => { if (value) params.set(key, value); });
