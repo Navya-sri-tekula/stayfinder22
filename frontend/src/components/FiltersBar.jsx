@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Filter, X, RotateCcw, MapPin, Navigation } from 'lucide-react';
+import api from '../services/api';
 
 const PROPERTY_TYPES = [
   { label: 'All Types', value: '' },
@@ -51,13 +52,10 @@ const FiltersBar = ({
     setLocationLoading(true);
     setLocationError('');
     try {
-      const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(locationQuery.trim())}`;
-      const response = await fetch(url, { headers: { Accept: 'application/json' } });
-      if (!response.ok) throw new Error('Location search is temporarily unavailable.');
-      const results = await response.json();
-      if (!results.length) throw new Error('No matching location found. Try a nearby area or landmark.');
-      onSearchLocation(Number(results[0].lat), Number(results[0].lon), results[0].display_name);
-    } catch (error) { setLocationError(error.message || 'Could not find that location.'); }
+      const response = await api.get('/location/search', { params: { q: locationQuery.trim() } });
+      if (!response.data?.success || !response.data.data) throw new Error(response.data?.message || 'No matching location found.');
+      onSearchLocation(response.data.data.latitude, response.data.data.longitude, response.data.data.display_name);
+    } catch (error) { setLocationError(error.response?.data?.message || error.message || 'Could not find that location.'); }
     finally { setLocationLoading(false); }
   };
   const handleTypeSelect = (typeVal) => {
