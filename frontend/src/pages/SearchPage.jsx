@@ -430,6 +430,14 @@ const SearchPage = () => {
               onClearLocation={clearLocation}
               geolocationError={geoError}
               geolocationLoading={geoLoading}
+              onSearchLocation={(latitude, longitude) => {
+                setCoords({ latitude, longitude, accuracy: null });
+                const updated = { ...filters, sortBy: 'distance', radius: filters.radius || '5', page: 1 };
+                setFilters(updated);
+                const params = new URLSearchParams();
+                Object.entries(updated).forEach(([key, value]) => { if (value) params.set(key, value); });
+                setSearchParams(params);
+              }}
             />
             <button
               onClick={() => setMobileFilterOpen(false)}
