@@ -7,11 +7,12 @@ import { formatCurrency } from '../utils/helpers';
 
 const parsePreferences = (message) => {
   const text = message.toLowerCase();
-  const amountMatches = [...message.matchAll(/(?:₹|rs\.?\s*)?([\d,]+)\s*(?:k|thousand)?/gi)];
+  const amountMatch = message.match(/(?:₹|rs\.?\s*)([\d,]+)\s*(k|thousand)?|(?:under|below|maximum|max|budget(?:\s+of)?)\s*(?:₹|rs\.?\s*)?([\d,]+)\s*(k|thousand)?|([\d,]+)\s*(k|thousand)\b/i);
   let maxPrice = '';
-  if (amountMatches.length) {
-    const raw = amountMatches[0][1].replace(/,/g, '');
-    maxPrice = String(Number(raw) * (/k|thousand/i.test(amountMatches[0][0]) ? 1000 : 1));
+  if (amountMatch) {
+    const raw = (amountMatch[1] || amountMatch[3] || amountMatch[5] || '').replace(/,/g, '');
+    const suffix = amountMatch[2] || amountMatch[4] || amountMatch[6] || '';
+    maxPrice = String(Number(raw) * (/k|thousand/i.test(suffix) ? 1000 : 1));
   }
   const sharing = ['single', '2 sharing', '2-share', 'double sharing', '3 sharing', '3-share', '4 sharing', '4-share'].find((v) => text.includes(v));
   const food = /food|mess|meals|breakfast|lunch|dinner/.test(text);
@@ -41,7 +42,7 @@ export default function StayFinderAssistant() {
       if (prefs.food) params.food = 'true';
       if (prefs.facilities.length) params.facilities = prefs.facilities.join(',');
       if (prefs.type) params.type = prefs.type;
-      const locationQuery = prompt.match(/(?:near|around|in|at)\s+([a-zA-Z][a-zA-Z\s,-]{2,50})/i)?.[1]?.trim();
+      const locationQuery = prompt.match(/(?:near|around|in|at)\s+([a-zA-Z][a-zA-Z\s,-]{2,50})/i)?.[1]?.split(/\s+(?:under|below|with|without|for|and|max|budget)\b/i)[0]?.trim();
       if (locationQuery) {
         try {
           const geo = await api.get('/location/search', { params: { q: locationQuery } });
