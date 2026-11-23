@@ -33,7 +33,7 @@ const searchOpenStreetMapLocation = async (query) => {
     const response = await fetch(url, { headers: { Accept: 'application/json', 'User-Agent': 'StayFinder/1.0 (location search)' } });
     if (!response.ok) throw new Error('OpenStreetMap location search is temporarily unavailable.');
     const results = await response.json();
-    const normalized = key.replace(/[^a-z0-9 ]/g, ' ').split(/\\s+/).filter(Boolean);
+    const normalized = key.replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(Boolean);
     const ranked = results.map((item) => {
       const address = item.address || {};
       const searchable = [item.display_name, address.suburb, address.neighbourhood, address.city_district, address.city, address.town, address.village, address.county, address.state].filter(Boolean).join(' ').toLowerCase();
