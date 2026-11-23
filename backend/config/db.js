@@ -4,78 +4,58 @@ const path = require('path');
 
 dotenv.config();
 
-let sequelize;
+let sequelizeInstance;
 
-const dbDialect = process.env.DB_DIALECT || 'mysql';
-const dbHost = process.env.DB_HOST || 'localhost';
-const dbPort = process.env.DB_PORT || 3306;
-const dbUser = process.env.DB_USER || 'root';
-const dbPassword = process.env.DB_PASSWORD || '';
-const dbName = process.env.DB_NAME || 'stayfinder_db';
+const commonOptions = {
+  logging: false,
+  define: { timestamps: true, underscored: true },
+  pool: { max: 2, min: 0, acquire: 30000, idle: 10000 },
+};
 
 const initSequelize = async () => {
-  if (dbDialect === 'mysql') {
-    try {
-      // Attempt to ensure database exists in MySQL
-      const mysql = require('mysql2/promise');
-      const connection = await mysql.createConnection({
-        host: dbHost,
-        port: dbPort,
-        user: dbUser,
-        password: dbPassword,
-      });
-      await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\`;`);
-      await connection.end();
-
-      sequelize = new Sequelize(dbName, dbUser, dbPassword, {
-        host: dbHost,
-        port: dbPort,
-        dialect: 'mysql',
-        logging: false,
-        define: {
-          timestamps: true,
-          underscored: true,
-        },
-      });
-
-      await sequelize.authenticate();
-      console.log(`[Database] Connected to MySQL database "${dbName}" successfully on ${dbHost}:${dbPort}.`);
-      return sequelize;
-    } catch (mysqlError) {
-      console.warn(`[Database] Warning: MySQL connection failed (${mysqlError.message}).`);
-      console.warn(`[Database] Falling back to SQLite local storage for seamless zero-setup execution.`);
-    }
+  if (sequelizeInstance) {
+    await sequelizeInstance.authenticate();
+    return sequelizeInstance;
   }
 
-  // SQLite fallback
-  const sqliteStoragePath = path.resolve(__dirname, '..', 'stayfinder.sqlite');
-  sequelize = new Sequelize({
-    dialect: 'sqlite',
-    storage: sqliteStoragePath,
-    logging: false,
-    define: {
-      timestamps: true,
-      underscored: true,
-    },
-  });
+  if (process.env.DATABASE_URL) {
+    sequelizeInstance = new Sequelize(process.env.DATABASE_URL, {
+      ...commonOptions,
+      dialect: 'postgres',
+      dialectOptions: {
+        ssl: { require: true, rejectUnauthorized: false },
+      },
+    });
+  } else if (process.env.NODE_ENV === 'production') {
+    throw new Error('DATABASE_URL is required in production. Configure your Neon PostgreSQL connection string in Vercel.');
+  } else if ((process.env.DB_DIALECT || '').toLowerCase() === 'mysql') {
+    sequelizeInstance = new Sequelize(
+      process.env.DB_NAME || 'stayfinder_db',
+      process.env.DB_USER || 'root',
+      process.env.DB_PASSWORD || '',
+      {
+        ...commonOptions,
+        dialect: 'mysql',
+        host: process.env.DB_HOST || 'localhost',
+        port: Number(process.env.DB_PORT || 3306),
+      }
+    );
+  } else {
+    sequelizeInstance = new Sequelize({
+      ...commonOptions,
+      dialect: 'sqlite',
+      storage: path.resolve(__dirname, '..', 'stayfinder.sqlite'),
+    });
+  }
 
-  await sequelize.authenticate();
-  console.log(`[Database] Connected to SQLite database (${sqliteStoragePath}).`);
-  return sequelize;
+  try {
+    await sequelizeInstance.authenticate();
+    console.log('[Database] Connection established.');
+    return sequelizeInstance;
+  } catch (error) {
+    sequelizeInstance = null;
+    throw error;
+  }
 };
 
-// Default export placeholder until init runs
-const placeholderSequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: path.resolve(__dirname, '..', 'stayfinder.sqlite'),
-  logging: false,
-  define: {
-    timestamps: true,
-    underscored: true,
-  },
-});
-
-module.exports = {
-  sequelize: placeholderSequelize,
-  initSequelize,
-};
+module.exports = { initSequelize };

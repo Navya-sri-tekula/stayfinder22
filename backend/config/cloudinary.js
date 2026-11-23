@@ -1,7 +1,5 @@
 const cloudinary = require('cloudinary').v2;
 const dotenv = require('dotenv');
-const fs = require('fs');
-const path = require('path');
 
 dotenv.config();
 
@@ -19,36 +17,23 @@ if (isCloudinaryConfigured) {
   });
 }
 
-/**
- * Uploads a local file or buffer to Cloudinary or falls back to local static URL.
- * @param {string} localFilePath - Path to file stored locally by multer
- * @param {string} originalName - Original filename
- * @returns {Promise<string>} - Resolves to public URL
- */
-const uploadImageFile = async (localFilePath, originalName) => {
-  if (isCloudinaryConfigured) {
-    try {
-      const result = await cloudinary.uploader.upload(localFilePath, {
-        folder: 'stayfinder',
-      });
-      // Optionally delete temp file
-      if (fs.existsSync(localFilePath)) {
-        fs.unlinkSync(localFilePath);
-      }
-      return result.secure_url;
-    } catch (error) {
-      console.error('Cloudinary upload error:', error);
-      // Fallback to local file path
-    }
+const uploadImageBuffer = async (buffer, originalName) => {
+  if (!isCloudinaryConfigured) {
+    const error = new Error('Image uploads are not configured. Add the Cloudinary credentials to the backend Vercel project.');
+    error.statusCode = 503;
+    throw error;
   }
 
-  // Local fallback: return relative URL served by express.static
-  const filename = path.basename(localFilePath);
-  return `/uploads/${filename}`;
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: 'stayfinder', resource_type: 'image', filename_override: originalName },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result.secure_url);
+      }
+    );
+    stream.end(buffer);
+  });
 };
 
-module.exports = {
-  cloudinary,
-  isCloudinaryConfigured,
-  uploadImageFile,
-};
+module.exports = { cloudinary, isCloudinaryConfigured, uploadImageBuffer };
