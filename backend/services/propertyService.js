@@ -27,7 +27,7 @@ class PropertyService {
       limit = 9,
     } = query;
 
-    const { Property, PropertyImage, Room, Facility, Review, Wishlist, User } = getModels();
+    const { Property, PropertyImage, Room, Facility, FoodMenu, Review, Wishlist, User } = getModels();
 
     // Base where conditions for Property
     const whereConditions = {};
@@ -95,6 +95,11 @@ class PropertyService {
           required: Object.keys(roomWhere).length > 0,
         },
         {
+          model: FoodMenu,
+          as: 'food_menus',
+          attributes: ['id'],
+        },
+        {
           model: Facility,
           as: 'facilities',
           where: Object.keys(facilityWhere).length > 0 ? facilityWhere : undefined,
@@ -156,13 +161,13 @@ class PropertyService {
       }
 
       // Check food menu availability
-      const hasFood =
-        (propData.facilities &&
-          propData.facilities.some((f) =>
-            f.facility_name.toLowerCase().includes('food') ||
-            f.facility_name.toLowerCase().includes('mess') ||
-            f.facility_name.toLowerCase().includes('kitchen')
-          ));
+      const hasFood = Boolean((propData.food_menus || []).length) || Boolean(
+        (propData.facilities || []).some((f) =>
+          f.facility_name.toLowerCase().includes('food') ||
+          f.facility_name.toLowerCase().includes('mess') ||
+          f.facility_name.toLowerCase().includes('kitchen')
+        )
+      );
 
       return {
         ...propData,
