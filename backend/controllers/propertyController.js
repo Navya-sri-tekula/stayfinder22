@@ -305,7 +305,7 @@ const uploadPropertyImages = async (req, res, next) => {
 
     const createdImages = [];
     for (const file of req.files) {
-      const imageUrl = await uploadImageBuffer(file.buffer, file.originalname);
+      const imageUrl = await uploadImageBuffer(file.buffer, file.originalname, file.mimetype);
       const imgRecord = await PropertyImage.create({
         property_id: property.id,
         image_url: imageUrl,
