@@ -45,7 +45,8 @@ const uploadImageBuffer = async (buffer, originalName, mimeType) => {
     CacheControl: 'public, max-age=31536000, immutable',
   }));
   const encodedKey = key.split('/').map(encodeURIComponent).join('/');
-  return endpoint.replace(/\\/+$/, '') + '/' + encodeURIComponent(bucket) + '/' + encodedKey;
+  const baseEndpoint = endpoint.endsWith('/') ? endpoint.slice(0, -1) : endpoint;
+  return baseEndpoint + '/' + encodeURIComponent(bucket) + '/' + encodedKey;
 };
 
 module.exports = { uploadImageBuffer };
