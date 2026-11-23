@@ -241,7 +241,7 @@ const PropertyDetailsPage = () => {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Shield size={18} color="#10b981" />
-                <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>StayFinder Verified Listing</span>
+                <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>Owner-submitted listing · review details before booking</span>
               </div>
             </div>
           </div>
