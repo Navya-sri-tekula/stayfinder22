@@ -29,8 +29,8 @@ const AddPropertyPage = () => {
     city: '',
     state: '',
     pincode: '',
-    latitude: 12.9716,
-    longitude: 77.5946,
+    latitude: '',
+    longitude: '',
     starting_price: '',
     status: 'available',
   });
@@ -44,9 +44,7 @@ const AddPropertyPage = () => {
   const [newRuleValue, setNewRuleValue] = useState('');
 
   // Photos
-  const [imageUrls, setImageUrls] = useState([
-    'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=1000&q=80',
-  ]);
+  const [imageUrls, setImageUrls] = useState([]);
   const [newImageUrl, setNewImageUrl] = useState('');
   const [selectedFiles, setSelectedFiles] = useState([]);
 
@@ -100,8 +98,13 @@ const AddPropertyPage = () => {
     e.preventDefault();
     setError('');
 
-    if (!formData.name || !formData.address || !formData.city || !formData.starting_price) {
-      setError('Please fill in all required property information.');
+    if (!formData.name || !formData.address || !formData.city || !formData.starting_price || formData.latitude === '' || formData.longitude === '') {
+      setError('Please complete the required property information and select its exact map location using the pin or GPS.');
+      return;
+    }
+
+    if (imageUrls.length === 0 && selectedFiles.length === 0) {
+      setError('Upload at least one genuine property photo before publishing.');
       return;
     }
 
@@ -199,7 +202,7 @@ const AddPropertyPage = () => {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Starting Price (₹) *</label>
+                <label className="form-label">Starting Price per Bed / Month (₹) *</label>
                 <input
                   type="number"
                   name="starting_price"
@@ -421,7 +424,7 @@ const AddPropertyPage = () => {
 
             {/* Local file upload */}
             <div style={{ marginBottom: '1rem' }}>
-              <label className="form-label" style={{ fontSize: '0.85rem' }}>Or Upload Photos from Computer:</label>
+              <label className="form-label" style={{ fontSize: '0.85rem' }}>Upload genuine photos from your property (required):</label>
               <input
                 type="file"
                 multiple
