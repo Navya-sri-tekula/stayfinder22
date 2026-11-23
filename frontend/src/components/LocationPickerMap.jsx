@@ -31,10 +31,11 @@ const LocationPickerMap = ({
   const defaultLat = latitude ? parseFloat(latitude) : 12.9716;
   const defaultLng = longitude ? parseFloat(longitude) : 77.5946;
 
-  const [position, setPosition] = useState({
-    lat: defaultLat,
-    lng: defaultLng,
-  });
+  const [position, setPosition] = useState(
+    Number.isFinite(defaultLat) && Number.isFinite(defaultLng) && latitude !== '' && longitude !== ''
+      ? { lat: defaultLat, lng: defaultLng }
+      : null
+  );
 
   const handleSelect = (lat, lng) => {
     const fixedLat = Math.round(lat * 1000000) / 1000000;
@@ -54,7 +55,7 @@ const LocationPickerMap = ({
   return (
     <div style={{ position: 'relative', width: '100%', height, borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1.5px solid var(--border-color)' }}>
       <MapContainer
-        center={[position.lat, position.lng]}
+        center={position ? [position.lat, position.lng] : [17.385, 78.4867]}
         zoom={13}
         scrollWheelZoom={false}
         style={{ height: '100%', width: '100%' }}
@@ -64,7 +65,7 @@ const LocationPickerMap = ({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <MapClickHandler onLocationSelect={handleSelect} />
-        <Marker
+        {position && <Marker
           position={[position.lat, position.lng]}
           icon={pickerIcon}
           draggable={true}
@@ -75,7 +76,7 @@ const LocationPickerMap = ({
               handleSelect(pos.lat, pos.lng);
             },
           }}
-        />
+        />}
       </MapContainer>
 
       {/* Floating Instructions & GPS Button */}
@@ -97,7 +98,7 @@ const LocationPickerMap = ({
         }}
       >
         <MapPin size={14} color="var(--primary)" />
-        <span>Click or drag pin to choose property location</span>
+        <span>Click map to place the property pin; drag it to adjust</span>
       </div>
 
       <button
