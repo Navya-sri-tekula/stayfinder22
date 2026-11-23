@@ -1,0 +1,10 @@
+import React, { useEffect, useState } from 'react';
+import { bookingService } from '../../services/bookingService';
+const OwnerBookingsPage = () => {
+  const [rows,setRows]=useState([]),[loading,setLoading]=useState(true),[error,setError]=useState('');
+  const load=async()=>{try{const r=await bookingService.getOwnerRequests();setRows(r.data||[]);setError('');}catch(e){setError(e.response?.data?.message||'Unable to load booking requests.');}finally{setLoading(false);}};
+  useEffect(()=>{load();},[]);
+  const update=async(id,status)=>{try{await bookingService.updateStatus(id,status);await load();}catch(e){setError(e.response?.data?.message||'Could not update request.');}};
+  return <div className="container" style={{padding:'2rem 1.5rem 4rem'}}><h1 style={{fontSize:'1.8rem',fontWeight:800}}>Booking requests</h1><p style={{color:'var(--text-muted)',margin:'0.5rem 0 1.5rem'}}>Review guest requests and approve or reject them based on availability.</p>{error&&<p style={{color:'var(--danger)'}}>{error}</p>}{loading?<p>Loading requests…</p>:rows.length===0?<div className="card" style={{padding:'2rem'}}>No booking requests received yet.</div>:<div style={{display:'grid',gap:'1rem'}}>{rows.map(b=><article className="card" key={b.id} style={{padding:'1.25rem'}}><div style={{display:'flex',justifyContent:'space-between',gap:'1rem',flexWrap:'wrap'}}><div><h2 style={{fontWeight:700}}>{b.property?.name}</h2><p>{b.user?.name} · {b.user?.email} · {b.user?.phone||'No phone'}</p><p>Room {b.room?.room_number} · {b.beds_requested} bed(s)</p><p>{b.check_in} to {b.check_out}</p>{b.message&&<p>Message: {b.message}</p>}</div><div><span className="badge badge-room">{b.status}</span>{b.status==='pending'&&<div style={{display:'flex',gap:'0.5rem',marginTop:'0.75rem'}}><button className="btn btn-primary btn-sm" onClick={()=>update(b.id,'approved')}>Approve</button><button className="btn btn-outline btn-sm" onClick={()=>update(b.id,'rejected')}>Reject</button></div>}</div></div></article>)}</div>}</div>;
+};
+export default OwnerBookingsPage;

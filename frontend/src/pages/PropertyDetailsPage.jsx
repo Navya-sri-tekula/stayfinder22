@@ -11,6 +11,7 @@ import { useWishlist } from '../context/WishlistContext';
 import { useAuth } from '../context/AuthContext';
 import MapView from '../components/MapView';
 import Modal from '../components/Modal';
+import BookingRequestModal from '../components/BookingRequestModal';
 import { formatCurrency, getPriceSuffix, getImageUrl } from '../utils/helpers';
 
 const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -25,6 +26,7 @@ const PropertyDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedDay, setSelectedDay] = useState('Monday');
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
 
   // Review Form Modal
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
@@ -632,6 +634,9 @@ const PropertyDetailsPage = () => {
                 </div>
               )}
 
+              <button onClick={() => setBookingModalOpen(true)} className="btn btn-primary" style={{ width: '100%', marginBottom: '0.6rem' }}>
+                <Calendar size={18} /><span>Request to Book</span>
+              </button>
               <button
                 onClick={() => toggleWishlist(property.id)}
                 className={`btn ${isSaved ? 'btn-danger' : 'btn-primary'}`}
@@ -644,6 +649,8 @@ const PropertyDetailsPage = () => {
           </div>
         </div>
       </div>
+
+      <BookingRequestModal isOpen={bookingModalOpen} onClose={() => setBookingModalOpen(false)} property={property} />
 
       {/* Review Modal Dialog */}
       <Modal

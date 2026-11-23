@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
-import { Building2, Heart, User, LogOut, LayoutDashboard, PlusCircle, Menu, X, Search } from 'lucide-react';
+import { Building2, Heart, User, LogOut, LayoutDashboard, PlusCircle, Menu, X, Search, CalendarCheck } from 'lucide-react';
 
 const Navbar = () => {
   const { user, isAuthenticated, isOwner, logout } = useAuth();
@@ -56,6 +56,16 @@ const Navbar = () => {
             </Link>
           )}
 
+          {isAuthenticated && !isOwner && (
+            <Link to="/bookings" className="nav-link" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <CalendarCheck size={18} /><span>My Bookings</span>
+            </Link>
+          )}
+          {isOwner && (
+            <Link to="/owner/bookings" className="nav-link" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <CalendarCheck size={18} /><span>Booking Requests</span>
+            </Link>
+          )}
           {isOwner && (
             <Link
               to="/owner/dashboard"
@@ -167,6 +177,16 @@ const Navbar = () => {
             </Link>
           )}
 
+          {isAuthenticated && !isOwner && (
+            <Link to="/bookings" className="nav-link" onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <CalendarCheck size={18} /> My Bookings
+            </Link>
+          )}
+          {isOwner && (
+            <Link to="/owner/bookings" className="nav-link" onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <CalendarCheck size={18} /> Booking Requests
+            </Link>
+          )}
           {isOwner && (
             <Link
               to="/owner/dashboard"

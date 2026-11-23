@@ -17,6 +17,7 @@ import RegisterPage from './pages/RegisterPage';
 // Protected User Pages
 import WishlistPage from './pages/WishlistPage';
 import ProfilePage from './pages/ProfilePage';
+import BookingsPage from './pages/BookingsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Protected Owner Pages
@@ -26,6 +27,7 @@ import EditPropertyPage from './pages/owner/EditPropertyPage';
 import ManageRoomsPage from './pages/owner/ManageRoomsPage';
 import ManageFoodMenuPage from './pages/owner/ManageFoodMenuPage';
 import ManageFacilitiesRulesPage from './pages/owner/ManageFacilitiesRulesPage';
+import OwnerBookingsPage from './pages/owner/OwnerBookingsPage';
 
 function App() {
   return (
@@ -71,6 +73,7 @@ function App() {
             >
               <Route index element={<Navigate to="/owner/dashboard" replace />} />
               <Route path="dashboard" element={<OwnerDashboard />} />
+              <Route path="bookings" element={<OwnerBookingsPage />} />
               <Route path="properties/add" element={<AddPropertyPage />} />
               <Route path="properties/:id/edit" element={<EditPropertyPage />} />
               <Route path="properties/:propertyId/rooms" element={<ManageRoomsPage />} />
