@@ -15,6 +15,28 @@ const { getRoomsByPropertyId } = require('./controllers/roomController');
 const { getFoodByPropertyId } = require('./controllers/foodController');
 const { getPropertyReviews } = require('./controllers/reviewController');
 const app = express();
+const geocodeCache = new Map();
+let geocodeQueue = Promise.resolve();
+let lastGeocodeAt = 0;
+const searchOpenStreetMapLocation = async (query) => {
+  const key = query.trim().toLowerCase();
+  const cached = geocodeCache.get(key);
+  if (cached && cached.expiresAt > Date.now()) return cached.result;
+  const task = geocodeQueue.then(async () => {
+    const wait = Math.max(0, 1100 - (Date.now() - lastGeocodeAt));
+    if (wait) await new Promise((resolve) => setTimeout(resolve, wait));
+    lastGeocodeAt = Date.now();
+    const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(query.trim())}`;
+    const response = await fetch(url, { headers: { Accept: 'application/json', 'User-Agent': 'StayFinder/1.0 (location search)' } });
+    if (!response.ok) throw new Error('OpenStreetMap location search is temporarily unavailable.');
+    const results = await response.json();
+    const result = results[0] ? { latitude: Number(results[0].lat), longitude: Number(results[0].lon), display_name: results[0].display_name } : null;
+    geocodeCache.set(key, { result, expiresAt: Date.now() + 24 * 60 * 60 * 1000 });
+    return result;
+  });
+  geocodeQueue = task.catch(() => {});
+  return task;
+};
 let databaseInitialization;
 const allowedOrigins = (process.env.FRONTEND_URL || '').split(',').map((origin) => origin.trim()).filter(Boolean);
 app.use(cors({
@@ -46,6 +68,15 @@ app.use(async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+});
+app.get('/api/location/search', async (req, res, next) => {
+  try {
+    const query = String(req.query.q || '').trim();
+    if (query.length < 3 || query.length > 160) return res.status(400).json({ success: false, message: 'Enter a location with 3 to 160 characters.' });
+    const result = await searchOpenStreetMapLocation(query);
+    if (!result) return res.status(404).json({ success: false, message: 'No matching location found. Try a nearby area or landmark.' });
+    res.json({ success: true, data: result, provider: 'OpenStreetMap Nominatim' });
+  } catch (error) { next(error); }
 });
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'StayFinder API is running.', database: 'connected', timestamp: new Date().toISOString() });
