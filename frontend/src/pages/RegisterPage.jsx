@@ -13,6 +13,7 @@ const RegisterPage = () => {
     email: '',
     phone: '',
     password: '',
+    owner_invite_code: '',
     role: searchParams.get('role') === 'owner' ? 'owner' : 'user',
   });
 
@@ -125,6 +126,23 @@ const RegisterPage = () => {
             </div>
           </div>
 
+          {formData.role === 'owner' && (
+            <div className="form-group">
+              <label className="form-label">Owner invitation code</label>
+              <input
+                type="password"
+                name="owner_invite_code"
+                placeholder="Enter your owner invitation code"
+                value={formData.owner_invite_code}
+                onChange={handleChange}
+                className="form-input"
+                autoComplete="off"
+                required
+              />
+              <small style={{ color: 'var(--text-muted)' }}>Owner registration is restricted to invited property owners.</small>
+            </div>
+          )}
+
           <div className="form-group">
             <label className="form-label">Full Name</label>
             <input
@@ -168,7 +186,7 @@ const RegisterPage = () => {
             <input
               type="password"
               name="password"
-              placeholder="At least 6 characters"
+              placeholder="At least 8 characters"
               value={formData.password}
               onChange={handleChange}
               className="form-input"

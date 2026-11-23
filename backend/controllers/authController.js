@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { getModels } = require('../models');
 const { getJwtSecret } = require('../utils/jwt');
@@ -9,10 +10,20 @@ const generateToken = (user) => jwt.sign(
 );
 const register = async (req, res, next) => {
   try {
-    const { name, email, phone, password, role } = req.body;
+    const { name, email, phone, password, role, owner_invite_code } = req.body;
     if (!name || !email || !password) return res.status(400).json({ success: false, message: 'Name, email, and password are required.' });
     if (String(name).trim().length < 2) return res.status(400).json({ success: false, message: 'Name must contain at least 2 characters.' });
     if (String(password).length < 8) return res.status(400).json({ success: false, message: 'Password must contain at least 8 characters.' });
+    if (role === 'owner') {
+      const configuredCode = process.env.OWNER_REGISTRATION_CODE || '';
+      const suppliedCode = String(owner_invite_code || '');
+      const validCode = configuredCode.length > 0 &&
+        suppliedCode.length === configuredCode.length &&
+        crypto.timingSafeEqual(Buffer.from(suppliedCode), Buffer.from(configuredCode));
+      if (!validCode) {
+        return res.status(403).json({ success: false, message: 'A valid owner invitation code is required to create a property owner account.' });
+      }
+    }
     const normalizedEmail = String(email).trim().toLowerCase();
     const { User } = getModels();
     const existingUser = await User.findOne({ where: { email: normalizedEmail } });
