@@ -21,7 +21,7 @@ Property owners can register, list their properties, pin exact coordinates on an
 - **Runtime**: Node.js
 - **Web Framework**: Express.js
 - **Authentication**: JSON Web Tokens (JWT) + bcrypt password hashing
-- **File Uploads**: Multer memory storage + Cloudinary (persistent image URLs; no writes to Vercel's read-only filesystem)
+- **File Uploads**: Multer memory storage + Neon Object Storage (S3-compatible persistent image URLs; no writes to Vercel's read-only filesystem)
 - **ORM / Database**: Sequelize ORM with Neon PostgreSQL in production; local SQLite fallback only for development
 - **Architecture**: Clean layered architecture (Controllers, Services, Models, Routes, Middleware, Utils)
 
@@ -185,7 +185,7 @@ DB_PASSWORD=
 JWT_SECRET=stayfinder_jwt_secure_secret_key_2026
 JWT_EXPIRES_IN=7d
 
-# Optional Cloudinary (Falls back to local /uploads/ if omitted)
+# Optional Neon Object Storage (Falls back to local /uploads/ if omitted)
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
@@ -295,3 +295,13 @@ npm run dev
 | `GET` | `/api/properties/:propertyId/reviews` | Get reviews and average rating | No |
 | `POST` | `/api/reviews` | Post a rating (1-5) and review | Yes |
 | `DELETE` | `/api/reviews/:id` | Delete review | Yes (Owner of review) |
+
+## Production deployment configuration
+
+- **Database:** Neon PostgreSQL using a pooled connection string in the backend Vercel project's `DATABASE_URL`.
+- **Image storage:** Neon Object Storage bucket `stayfinder-images` with public-read object URLs and branch-scoped S3 credentials stored only in Vercel environment variables.
+- **Owner registration:** Property-owner signup requires the private `OWNER_REGISTRATION_CODE`; regular tenant signup does not.
+- **API routing:** The frontend Vercel project proxies `/api/*` requests to the backend project, so the browser uses same-origin API requests.
+- **Payments:** Not enabled; booking requests are submitted to owners for approval or rejection.
+
+Required backend environment keys are documented in `backend/.env.example`. Never commit production connection strings, JWT secrets, storage credentials, or the owner invitation code.
