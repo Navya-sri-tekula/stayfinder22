@@ -228,9 +228,11 @@ const SearchPage = () => {
             onSearchLocation={(latitude, longitude, displayName) => {
               setCoords({ latitude, longitude });
               const area = displayName.split(',').slice(0, 2).join(',').trim();
-              handleFilterChange('city', area);
-              handleFilterChange('sortBy', 'distance');
-              handleFilterChange('radius', filters.radius || '5');
+              const updated = { ...filters, city: area, sortBy: 'distance', radius: filters.radius || '5', page: 1 };
+              setFilters(updated);
+              const params = new URLSearchParams();
+              Object.entries(updated).forEach(([key, value]) => { if (value) params.set(key, value); });
+              setSearchParams(params);
             }}
           />
         </div>
