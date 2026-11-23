@@ -14,7 +14,7 @@ const parsePreferences = (message) => {
   const sharingMatch = text.match(/\b(single|1\s*sharing|2\s*sharing|double sharing|2-share|3\s*sharing|triple sharing|3-share|4\s*sharing|4-share)\b/i);
   const sharing = sharingMatch ? (sharingMatch[1].includes('single') || sharingMatch[1].includes('1') ? 'Single' : sharingMatch[1].includes('2') || sharingMatch[1].includes('double') ? '2 sharing' : sharingMatch[1].includes('3') || sharingMatch[1].includes('triple') ? '3 sharing' : '4 sharing') : '';
   const food = /\b(food|mess|meals|breakfast|lunch|dinner)\b/.test(text);
-  const facilities = ['wifi', 'ac', 'laundry', 'parking'].filter((value) => new RegExp('\\b' + value + '\\b', 'i').test(text));
+  const facilities = ['WiFi', 'AC', 'Laundry', 'Parking'].filter((value) => new RegExp('\\b' + value + '\\b', 'i').test(text));
   const type = /\bhostel\b/.test(text) ? 'hostel' : /\b(pg|paying guest)\b/.test(text) ? 'pg' : /\bhotel\b/.test(text) ? 'hotel' : /\b(private room|room)\b/.test(text) ? 'room' : '';
   const locationMatch = message.match(/\b(?:near|around|in|at)\s+([a-zA-Z][a-zA-Z\s,-]{1,55}?)(?=\s+(?:under|below|less than|with|without|for|and|maximum|max|budget|food|mess|wifi|ac|laundry|parking|single|[234]\s*sharing)\b|[,;.]|$)/i);
   const location = locationMatch ? locationMatch[1].trim() : '';
