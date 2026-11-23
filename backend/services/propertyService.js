@@ -128,16 +128,13 @@ class PropertyService {
       const propData = prop.toJSON();
 
       // Bed and room aggregation
-      const rooms = (propData.rooms || []).map((room) => ({ ...room, available_beds: Math.max(0, Number(room.total_beds || 0) - Number(room.occupied_beds || 0)) })).filter((room) => room.available_beds > 0);
-      let totalBeds = 0;
-      let occupiedBeds = 0;
+      const allRooms = (propData.rooms || []).map((room) => ({ ...room, available_beds: Math.max(0, Number(room.total_beds || 0) - Number(room.occupied_beds || 0)) }));
+      const totalBeds = allRooms.reduce((sum, room) => sum + Number(room.total_beds || 0), 0);
+      const occupiedBeds = allRooms.reduce((sum, room) => sum + Number(room.occupied_beds || 0), 0);
+      const rooms = allRooms.filter((room) => room.available_beds > 0);
       const sharingTypes = new Set();
 
-      rooms.forEach((r) => {
-        totalBeds += r.total_beds || 0;
-        occupiedBeds += r.occupied_beds || 0;
-        if (r.sharing_type) sharingTypes.add(r.sharing_type);
-      });
+      rooms.forEach((r) => { if (r.sharing_type) sharingTypes.add(r.sharing_type); });
 
       const availableBeds = Math.max(0, totalBeds - occupiedBeds);
 
