@@ -56,6 +56,11 @@ module.exports = (sequelize) => {
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    amenities: {
+      type: DataTypes.JSON,
+      allowNull: false,
+      defaultValue: [],
+    },
     available_beds: {
       type: DataTypes.VIRTUAL,
       get() {
