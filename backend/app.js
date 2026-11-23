@@ -23,6 +23,8 @@ const searchOpenStreetMapLocation = async (query) => {
   const cached = geocodeCache.get(key);
   if (cached && cached.expiresAt > Date.now()) return cached.result;
   const task = geocodeQueue.then(async () => {
+    const freshCache = geocodeCache.get(key);
+    if (freshCache && freshCache.expiresAt > Date.now()) return freshCache.result;
     const wait = Math.max(0, 1100 - (Date.now() - lastGeocodeAt));
     if (wait) await new Promise((resolve) => setTimeout(resolve, wait));
     lastGeocodeAt = Date.now();
