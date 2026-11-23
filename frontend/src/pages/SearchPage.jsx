@@ -10,7 +10,7 @@ import { Search, Map, List, SlidersHorizontal, ChevronLeft, ChevronRight, X } fr
 
 const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { coords, getLocation, clearLocation, loading: geoLoading } = useGeolocation();
+  const { coords, getLocation, clearLocation, loading: geoLoading, error: geoError, setCoords } = useGeolocation();
 
   // Filters State
   const [filters, setFilters] = useState({
@@ -216,6 +216,7 @@ const SearchPage = () => {
       </div>
 
       {!loading && <SmartStayAssistant properties={properties} filters={filters} coords={coords} />}
+      {geoError && <div role="alert" style={{ marginBottom: 12, padding: '10px 14px', borderRadius: 10, background: '#fff7ed', color: '#9a3412', fontSize: 13 }}>{geoError}</div>}
 
       {/* Main Layout: Filters Column + Content Column */}
       <div style={{ display: 'flex', gap: '1.75rem', alignItems: 'flex-start' }} className="search-page-layout">
@@ -272,7 +273,7 @@ const SearchPage = () => {
               )}
               {coords && (
                 <span className="badge badge-room">
-                  GPS Active ({coords.latitude.toFixed(2)}, {coords.longitude.toFixed(2)})
+                  GPS Active ({coords.latitude.toFixed(5)}, {coords.longitude.toFixed(5)})
                   <X size={12} style={{ cursor: 'pointer' }} onClick={clearLocation} />
                 </span>
               )}
@@ -427,6 +428,8 @@ const SearchPage = () => {
               userCoords={coords}
               onGetLocation={getLocation}
               onClearLocation={clearLocation}
+              geolocationError={geoError}
+              geolocationLoading={geoLoading}
             />
             <button
               onClick={() => setMobileFilterOpen(false)}
