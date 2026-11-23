@@ -1,0 +1,14 @@
+{
+  "name": "stayfinder",
+  "version": "1.0.0",
+  "description": "StayFinder - Location-based hostel, PG, hotel, and room discovery platform",
+  "scripts": {
+    "install:all": "npm --prefix backend install && npm --prefix frontend install",
+    "seed": "npm --prefix backend run seed",
+    "backend": "npm --prefix backend start",
+    "frontend": "npm --prefix frontend run dev"
+  },
+  "keywords": ["stayfinder", "hostel", "pg", "hotel", "rooms", "leaflet", "react", "express", "sequelize"],
+  "author": "",
+  "license": "ISC"
+}
