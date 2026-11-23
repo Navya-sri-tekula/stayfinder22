@@ -2,13 +2,14 @@ import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { LayoutDashboard, PlusCircle, Building, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, Building, ShieldCheck, CalendarCheck } from 'lucide-react';
 
 const OwnerLayout = () => {
   const location = useLocation();
 
   const navItems = [
     { label: 'Dashboard Overview', path: '/owner/dashboard', icon: <LayoutDashboard size={18} /> },
+    { label: 'Booking Requests', path: '/owner/bookings', icon: <CalendarCheck size={18} /> },
     { label: 'Add New Property', path: '/owner/properties/add', icon: <PlusCircle size={18} /> },
   ];
 
