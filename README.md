@@ -21,8 +21,8 @@ Property owners can register, list their properties, pin exact coordinates on an
 - **Runtime**: Node.js
 - **Web Framework**: Express.js
 - **Authentication**: JSON Web Tokens (JWT) + bcrypt password hashing
-- **File Uploads**: Multer (stores in `uploads/` with Cloudinary support)
-- **ORM / Database**: Sequelize ORM connecting to MySQL (with zero-configuration automatic fallback for local demo testing)
+- **File Uploads**: Multer memory storage + Cloudinary (persistent image URLs; no writes to Vercel's read-only filesystem)
+- **ORM / Database**: Sequelize ORM with Neon PostgreSQL in production; local SQLite fallback only for development
 - **Architecture**: Clean layered architecture (Controllers, Services, Models, Routes, Middleware, Utils)
 
 ---
@@ -30,6 +30,7 @@ Property owners can register, list their properties, pin exact coordinates on an
 ## 🚀 Key Features
 
 ### 👤 User / Tenant Features
+- **Booking Requests**: Tenants submit date-based room/bed requests; owners approve or reject; tenants can track or cancel requests. No online payments are collected.
 - **User Authentication**: Secure registration and login with bcrypt-hashed passwords and JWT tokens.
 - **Modern Homepage**: Hero search bar, stay categories, popular tech hubs (Bangalore, Hyderabad, Pune, Mumbai), and verified featured stays.
 - **Advanced Search & Filtering**:
@@ -76,7 +77,7 @@ Property owners can register, list their properties, pin exact coordinates on an
 
 ## 🗄️ Relational Database Schema
 
-The database is built on MySQL using Sequelize ORM:
+The production database uses Neon PostgreSQL through Sequelize ORM:
 
 ```
 users
