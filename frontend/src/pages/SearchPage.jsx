@@ -225,6 +225,13 @@ const SearchPage = () => {
             userCoords={coords}
             onGetLocation={getLocation}
             onClearLocation={clearLocation}
+            onSearchLocation={(latitude, longitude, displayName) => {
+              setCoords({ latitude, longitude });
+              const area = displayName.split(',').slice(0, 2).join(',').trim();
+              handleFilterChange('city', area);
+              handleFilterChange('sortBy', 'distance');
+              handleFilterChange('radius', filters.radius || '5');
+            }}
           />
         </div>
 
