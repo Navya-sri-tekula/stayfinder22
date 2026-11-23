@@ -49,14 +49,17 @@ class PropertyService {
       ];
     }
 
-    if (minPrice || maxPrice) {
-      whereConditions.starting_price = {};
-      if (minPrice) whereConditions.starting_price[Op.gte] = parseFloat(minPrice);
-      if (maxPrice) whereConditions.starting_price[Op.lte] = parseFloat(maxPrice);
+    // Tenant budgets apply to the actual per-bed monthly room price, not a property-level teaser price.
+    const hasRoomPriceFilter = minPrice !== undefined && minPrice !== '' || maxPrice !== undefined && maxPrice !== '';
+    const roomPriceWhere = {};
+    if (hasRoomPriceFilter) {
+      if (minPrice !== undefined && minPrice !== '') roomPriceWhere[Op.gte] = parseFloat(minPrice);
+      if (maxPrice !== undefined && maxPrice !== '') roomPriceWhere[Op.lte] = parseFloat(maxPrice);
     }
 
     // Room include condition if sharing filter is applied
     const roomWhere = {};
+    if (hasRoomPriceFilter) roomWhere.price = roomPriceWhere;
     if (sharing) {
       const sharingArr = Array.isArray(sharing) ? sharing : sharing.split(',');
       const sharingConditions = sharingArr.map((s) => ({
@@ -120,7 +123,7 @@ class PropertyService {
       const propData = prop.toJSON();
 
       // Bed and room aggregation
-      const rooms = propData.rooms || [];
+      const rooms = (propData.rooms || []).map((room) => ({ ...room, available_beds: Math.max(0, Number(room.total_beds || 0) - Number(room.occupied_beds || 0)) })).filter((room) => room.available_beds > 0);
       let totalBeds = 0;
       let occupiedBeds = 0;
       const sharingTypes = new Set();
@@ -163,6 +166,7 @@ class PropertyService {
 
       return {
         ...propData,
+        rooms,
         total_beds: totalBeds,
         occupied_beds: occupiedBeds,
         available_beds: availableBeds,
@@ -171,8 +175,13 @@ class PropertyService {
         review_count: reviewCount,
         distance,
         has_food: hasFood,
+        // Display the cheapest currently bookable room option as the starting monthly price.
+        starting_price: rooms.length ? Math.min(...rooms.map((room) => Number(room.price))) : Number(propData.starting_price || 0),
       };
     });
+
+    // Never advertise a property as available when every matching room is full.
+    processed = processed.filter((property) => property.rooms && property.rooms.length > 0);
 
     // Filter by food if requested
     if (food === 'true' || food === true) {
