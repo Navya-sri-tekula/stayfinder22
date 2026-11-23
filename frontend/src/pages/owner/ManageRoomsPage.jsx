@@ -10,6 +10,7 @@ import {
 import { formatCurrency, getPriceSuffix } from '../../utils/helpers';
 
 const SHARING_SUGGESTIONS = ['Single sharing', '2 sharing', '3 sharing', '4 sharing', '6 sharing'];
+const ROOM_AMENITIES = ['Wardrobe', 'Study table', 'Balcony', 'Attached bathroom', 'Geyser', 'Fan', 'AC', 'Refrigerator', 'TV', 'Window', 'Private entrance', 'WiFi'];
 
 const ManageRoomsPage = () => {
   const { propertyId } = useParams();
@@ -32,6 +33,7 @@ const ManageRoomsPage = () => {
     ac: false,
     attached_bathroom: true,
     description: '',
+    amenities: [],
   });
 
   const [formError, setFormError] = useState('');
@@ -69,6 +71,7 @@ const ManageRoomsPage = () => {
       ac: false,
       attached_bathroom: true,
       description: '',
+      amenities: [],
     });
     setFormError('');
     setModalOpen(true);
@@ -85,6 +88,7 @@ const ManageRoomsPage = () => {
       ac: Boolean(room.ac),
       attached_bathroom: Boolean(room.attached_bathroom),
       description: room.description || '',
+      amenities: Array.isArray(room.amenities) ? room.amenities : [],
     });
     setFormError('');
     setModalOpen(true);
@@ -352,6 +356,8 @@ const ManageRoomsPage = () => {
                     )}
                   </div>
 
+                  {room.amenities?.length > 0 && <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>{room.amenities.map((amenity) => <span key={amenity} className="facility-pill-sm">{amenity}</span>)}</div>}
+
                   {room.description && (
                     <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)' }}>{room.description}</p>
                   )}
@@ -491,6 +497,13 @@ const ManageRoomsPage = () => {
               />
               <span>Attached Bathroom</span>
             </label>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Room-specific facilities</label>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '0.5rem', marginTop: '0.5rem' }}>
+              {ROOM_AMENITIES.map((amenity) => <label key={amenity} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.82rem' }}><input type="checkbox" checked={formData.amenities.includes(amenity)} onChange={(e) => setFormData((prev) => ({ ...prev, amenities: e.target.checked ? [...prev.amenities, amenity] : prev.amenities.filter((item) => item !== amenity) }))} />{amenity}</label>)}
+            </div>
           </div>
 
           <div className="form-group">
