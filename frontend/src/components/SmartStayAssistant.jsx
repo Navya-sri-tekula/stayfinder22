@@ -15,13 +15,17 @@ const SmartStayAssistant = ({ properties = [], filters = {}, coords }) => {
       let score = 0;
       const price = Number(property.starting_price) || 0;
       const budget = Number(filters.maxPrice);
-      if (budget && price <= budget) { score += 35; reasons.push('within your monthly budget'); }
-      else if (!budget) { score += 15; reasons.push('price compared with other matches'); }
+      const minBudget = Number(filters.minPrice);
+      if (budget && price <= budget && (!minBudget || price >= minBudget)) { score += 35; reasons.push('within your monthly budget'); }
+      else if (!budget && !minBudget) { score += 15; reasons.push('price compared with other matches'); }
+      else if (minBudget && price >= minBudget && (!budget || price <= budget)) { score += 20; reasons.push('within your price range'); }
       if (filters.sharing && (property.sharing_options || []).some((s) => filters.sharing.toLowerCase().split(',').some((v) => s.toLowerCase().includes(v.trim())))) { score += 25; reasons.push('your preferred sharing type'); }
       if (coords && Number.isFinite(Number(property.distance))) { score += 20 * (1 - Math.min(Number(property.distance) / maxDistance, 1)); reasons.push('near your selected location'); }
       if (property.average_rating) { score += Math.min(Number(property.average_rating) / 5, 1) * 10; reasons.push('guest ratings'); }
       if (filters.food === 'true' && property.has_food) { score += 10; reasons.push('food or mess availability'); }
-      if (filters.facilities && property.facilities?.length) { score += 10; reasons.push('listed facilities'); }
+      const wantedFacilities = (filters.facilities || '').split(',').map((value) => value.trim().toLowerCase()).filter(Boolean);
+      const actualFacilities = (property.facilities || []).map((facility) => String(facility.facility_name || '').toLowerCase());
+      if (wantedFacilities.length && wantedFacilities.every((wanted) => actualFacilities.includes(wanted))) { score += 10; reasons.push('your selected facilities'); }
       if (!reasons.length) reasons.push('available beds and overall value');
       return { ...property, matchScore: Math.round(score), matchReasons: reasons };
     }).sort((a, b) => b.matchScore - a.matchScore).slice(0, 3);
