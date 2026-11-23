@@ -1,4 +1,6 @@
 const { Sequelize } = require('sequelize');
+// Explicit import ensures Vercel's function tracer bundles the PostgreSQL driver.
+const pg = require('pg');
 const dotenv = require('dotenv');
 const path = require('path');
 dotenv.config();
