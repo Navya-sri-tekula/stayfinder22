@@ -1,6 +1,6 @@
 const { getModels } = require('../models');
 const PropertyService = require('../services/propertyService');
-const { uploadImageFile } = require('../config/cloudinary');
+const { uploadImageBuffer } = require('../config/cloudinary');
 
 // @desc    Get all properties with filtering, search, map radius & pagination
 // @route   GET /api/properties
@@ -305,7 +305,7 @@ const uploadPropertyImages = async (req, res, next) => {
 
     const createdImages = [];
     for (const file of req.files) {
-      const imageUrl = await uploadImageFile(file.path, file.originalname);
+      const imageUrl = await uploadImageBuffer(file.buffer, file.originalname);
       const imgRecord = await PropertyImage.create({
         property_id: property.id,
         image_url: imageUrl,
