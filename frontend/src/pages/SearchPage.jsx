@@ -4,6 +4,7 @@ import { propertyService } from '../services/propertyService';
 import PropertyCard from '../components/PropertyCard';
 import MapView from '../components/MapView';
 import FiltersBar from '../components/FiltersBar';
+import SmartStayAssistant from '../components/SmartStayAssistant';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { Search, Map, List, SlidersHorizontal, ChevronLeft, ChevronRight, X } from 'lucide-react';
 
@@ -213,6 +214,8 @@ const SearchPage = () => {
           </div>
         </div>
       </div>
+
+      {!loading && <SmartStayAssistant properties={properties} filters={filters} coords={coords} />}
 
       {/* Main Layout: Filters Column + Content Column */}
       <div style={{ display: 'flex', gap: '1.75rem', alignItems: 'flex-start' }} className="search-page-layout">
